@@ -13,16 +13,14 @@
                 margin: 0;
                 padding: 0;
             }
-            #map {
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                width: 100%;
-            }
         </style>
     </head>
     <body>
-        <div id="map" style="height: 100vh"></div>
+        <div>
+            Infra: client -> api.spatialty.io (Cloudflare Workers) -> chiitiler
+            (AWS Lambda)
+        </div>
+        <div id="map" style="height: calc(100vh - 2rem)"></div>
         <script>
             const map = new maplibregl.Map({
                 hash: true,
