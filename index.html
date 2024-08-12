@@ -17,8 +17,8 @@
     </head>
     <body>
         <div>
-            Infra: client -> api.spatialty.io (Cloudflare Workers) -> chiitiler
-            (AWS Lambda)
+            Infra: client -> CloudFront -> Lambda(BFF) -> Lambda(chiitiler) ->
+            S3(cache)
         </div>
         <div id="map" style="height: calc(100vh - 2rem)"></div>
         <script>
