@@ -64,6 +64,11 @@
                 };
             };
 
+            // query param
+            const defaultStyleName =
+                new URLSearchParams(window.location.search).get('stylename') ||
+                'osmjp-osm';
+
             const map = new maplibregl.Map({
                 hash: true,
                 container: 'map', // container id
@@ -77,6 +82,9 @@
             document.querySelector('select').addEventListener('change', (e) => {
                 const styleName = e.target.value;
                 map.setStyle(makeStyle(styleName));
+                // update query param
+                const url = new URL(window.location);
+                url.searchParams.set('stylename', styleName);
             });
         </script>
     </body>
