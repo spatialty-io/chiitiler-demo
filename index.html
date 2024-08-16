@@ -81,6 +81,10 @@
             const defaultStyleName =
                 new URLSearchParams(window.location.search).get('stylename') ||
                 'osmjp-osm';
+            // update select
+            document.querySelector(
+                `option[value="${defaultStyleName}"]`,
+            ).selected = true;
 
             const map = new maplibregl.Map({
                 hash: true,
