@@ -17,18 +17,20 @@
     </head>
     <body>
         <div>
-            Infra: client -> CloudFront -> Lambda(BFF) -> Lambda(chiitiler) ->
-            S3(cache)
+            Infra: client -> CloudFront -> Lambda(Hono + chiitiler) -> S3(cache)
         </div>
+        <select>
+            <option value="osmjp-osm">osm.js - OSM style</option>
+            <option value="osmjp-bright">osm.js - Bright style</option>
+            <option value="gsi-std">GSI - std</option>
+        </select>
         <div id="map" style="height: calc(100vh - 2rem)"></div>
         <script>
-            const map = new maplibregl.Map({
-                hash: true,
-                container: 'map', // container id
-                style: {
+            const makeStyle = (stylename) => {
+                return {
                     version: 8,
                     sources: {
-                        'gsi-std': {
+                        'osmjp-osm': {
                             type: 'raster',
                             tiles: [
                                 'https://api.spatialty.io/osmjp-osm/{z}/{x}/{y}',
@@ -36,19 +38,45 @@
                             attribution:
                                 '<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
                         },
+                        'osmjp-bright': {
+                            type: 'raster',
+                            tiles: [
+                                'https://api.spatialty.io/osmjp-bright/{z}/{x}/{y}',
+                            ],
+                            attribution:
+                                '<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+                        },
+                        'gsi-std': {
+                            type: 'raster',
+                            tiles: [
+                                'https://api.spatialty.io/gsi-std/{z}/{x}/{y}',
+                            ],
+                            attribution: 'GSI Vectortile',
+                        },
                     },
                     layers: [
                         {
-                            id: 'gsi-std',
+                            id: 'raster',
                             type: 'raster',
-                            source: 'gsi-std',
+                            source: stylename,
                         },
                     ],
-                },
+                };
+            };
+
+            const map = new maplibregl.Map({
+                hash: true,
+                container: 'map', // container id
                 center: [140, 40],
                 zoom: 4,
                 minZoom: 0,
                 maxZoom: 18,
+                style: makeStyle('osmjp-osm'),
+            });
+
+            document.querySelector('select').addEventListener('change', (e) => {
+                const styleName = e.target.value;
+                map.setStyle(makeStyle(styleName));
             });
         </script>
     </body>
