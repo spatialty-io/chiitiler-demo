@@ -36,6 +36,7 @@
             <option value="osmjp-osm">osmjp - OSM style</option>
             <option value="osmjp-bright">osmjp - Bright style</option>
             <option value="gsi-std">GSI - std</option>
+            <option value="cog">Cloud Optimized GeoTIFF</option>
         </select>
         <div id="map" style="height: calc(100vh - 2rem)"></div>
         <script>
@@ -65,6 +66,12 @@
                                 'https://api.spatialty.io/gsi-std/{z}/{x}/{y}',
                             ],
                             attribution: 'GSI Vectortile',
+                        },
+                        cog: {
+                            type: 'raster',
+                            tiles: ['https://api.spatialty.io/cog/{z}/{x}/{y}'],
+                            attribution:
+                                "Copernicus Sentinel data 2024' for Sentinel data",
                         },
                     },
                     layers: [
