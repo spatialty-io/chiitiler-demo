@@ -1,116 +1,116 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>chiitiler demo page</title>
-        <script src="https://unpkg.com/maplibre-gl@^4.0/dist/maplibre-gl.js"></script>
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/maplibre-gl@^4.0/dist/maplibre-gl.css"
-        />
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-            }
-        </style>
-    </head>
-    <body>
-        <a
-            href="https://github.com/Kanahiro/chiitiler"
-            style="position: fixed; top: 0; right: 0; z-index: 1000"
-            ><img
-                decoding="async"
-                width="149"
-                height="149"
-                src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149"
-                class="attachment-full size-full"
-                alt="Fork me on GitHub"
-                loading="lazy"
-                data-recalc-dims="1"
-        /></a>
-        <div>
-            Infra: client -> CloudFront -> Lambda(Hono + chiitiler) -> S3(cache)
-        </div>
-        <select>
-            <option value="osmjp-osm">osmjp - OSM style</option>
-            <option value="osmjp-bright">osmjp - Bright style</option>
-            <option value="gsi-std">GSI - std</option>
-            <option value="cog">Cloud Optimized GeoTIFF</option>
-        </select>
-        <div id="map" style="height: calc(100vh - 2rem)"></div>
-        <script>
-            const makeStyle = (stylename) => {
-                return {
-                    version: 8,
-                    sources: {
-                        'osmjp-osm': {
-                            type: 'raster',
-                            tiles: [
-                                'https://api.spatialty.io/osmjp-osm/{z}/{x}/{y}',
-                            ],
-                            attribution:
-                                '<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
-                        },
-                        'osmjp-bright': {
-                            type: 'raster',
-                            tiles: [
-                                'https://api.spatialty.io/osmjp-bright/{z}/{x}/{y}',
-                            ],
-                            attribution:
-                                '<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
-                        },
-                        'gsi-std': {
-                            type: 'raster',
-                            tiles: [
-                                'https://api.spatialty.io/gsi-std/{z}/{x}/{y}',
-                            ],
-                            attribution: 'GSI Vectortile',
-                        },
-                        cog: {
-                            type: 'raster',
-                            tiles: ['https://api.spatialty.io/cog/{z}/{x}/{y}'],
-                            attribution:
-                                "Copernicus Sentinel data 2024' for Sentinel data",
-                        },
-                    },
-                    layers: [
-                        {
-                            id: 'raster',
-                            type: 'raster',
-                            source: stylename,
-                        },
-                    ],
-                };
-            };
+	<head>
+		<meta charset="utf-8" />
+		<title>chiitiler demo page</title>
+		<script src="https://unpkg.com/maplibre-gl@^4.0/dist/maplibre-gl.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/maplibre-gl@^4.0/dist/maplibre-gl.css"
+		/>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<a
+			href="https://github.com/Kanahiro/chiitiler"
+			style="position: fixed; top: 0; right: 0; z-index: 1000"
+			><img
+				decoding="async"
+				width="149"
+				height="149"
+				src="https://github.blog/wp-content/uploads/2008/12/forkme_right_red_aa0000.png?resize=149%2C149"
+				class="attachment-full size-full"
+				alt="Fork me on GitHub"
+				loading="lazy"
+				data-recalc-dims="1"
+		/></a>
+		<div>
+			Infra: client -> CloudFront -> Lambda(Hono + chiitiler) -> S3(cache)
+		</div>
+		<select>
+			<option value="osmjp-osm">osmjp - OSM style</option>
+			<option value="osmjp-bright">osmjp - Bright style</option>
+			<option value="gsi-std">GSI - std</option>
+			<option value="cog">Cloud Optimized GeoTIFF</option>
+			<option value="osmvt-colorful">osmvt - colorful</option>
+		</select>
+		<div id="map" style="height: calc(100vh - 2rem)"></div>
+		<script>
+			const makeStyle = (stylename) => {
+				return {
+					version: 8,
+					sources: {
+						'osmjp-osm': {
+							type: 'raster',
+							tiles: ['https://api.spatialty.io/osmjp-osm/{z}/{x}/{y}'],
+							attribution:
+								'<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+						},
+						'osmjp-bright': {
+							type: 'raster',
+							tiles: ['https://api.spatialty.io/osmjp-bright/{z}/{x}/{y}'],
+							attribution:
+								'<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
+						},
+						'gsi-std': {
+							type: 'raster',
+							tiles: ['https://api.spatialty.io/gsi-std/{z}/{x}/{y}'],
+							attribution: 'GSI Vectortile',
+						},
+						cog: {
+							type: 'raster',
+							tiles: ['https://api.spatialty.io/cog/{z}/{x}/{y}'],
+							attribution: "Copernicus Sentinel data 2024' for Sentinel data",
+						},
+						'osmvt-colorful': {
+							type: 'raster',
+							tiles: ['https://api.spatialty.io/osmvt-colorful/{z}/{x}/{y}'],
+							attribution:
+								'<a href="https://openstreetmap.org/">©︎ OpenStreetMap<a>',
+						},
+					},
+					layers: [
+						{
+							id: 'raster',
+							type: 'raster',
+							source: stylename,
+						},
+					],
+				};
+			};
 
-            // query param
-            const defaultStyleName =
-                new URLSearchParams(window.location.search).get('stylename') ||
-                'osmjp-osm';
-            // update select
-            document.querySelector(
-                `option[value="${defaultStyleName}"]`,
-            ).selected = true;
+			// query param
+			const defaultStyleName =
+				new URLSearchParams(window.location.search).get('stylename') ||
+				'osmjp-osm';
+			// update select
+			document.querySelector(
+				`option[value="${defaultStyleName}"]`,
+			).selected = true;
 
-            const map = new maplibregl.Map({
-                hash: true,
-                container: 'map', // container id
-                center: [140, 40],
-                zoom: 4,
-                minZoom: 0,
-                maxZoom: 18,
-                style: makeStyle(defaultStyleName),
-            });
+			const map = new maplibregl.Map({
+				hash: true,
+				container: 'map', // container id
+				center: [140, 40],
+				zoom: 4,
+				minZoom: 0,
+				maxZoom: 18,
+				style: makeStyle(defaultStyleName),
+			});
 
-            document.querySelector('select').addEventListener('change', (e) => {
-                const styleName = e.target.value;
-                map.setStyle(makeStyle(styleName));
-                // update query param
-                const url = new URL(window.location);
-                url.searchParams.set('stylename', styleName);
-                window.history.pushState({}, '', url);
-            });
-        </script>
-    </body>
+			document.querySelector('select').addEventListener('change', (e) => {
+				const styleName = e.target.value;
+				map.setStyle(makeStyle(styleName));
+				// update query param
+				const url = new URL(window.location);
+				url.searchParams.set('stylename', styleName);
+				window.history.pushState({}, '', url);
+			});
+		</script>
+	</body>
 </html>
