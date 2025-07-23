@@ -37,7 +37,6 @@
 			<option value="osmjp-bright">osmjp - Bright style</option>
 			<option value="gsi-std">GSI - std</option>
 			<option value="cog">Cloud Optimized GeoTIFF</option>
-			<option value="osmvt-colorful">osmvt - colorful</option>
 		</select>
 		<div id="map" style="height: calc(100vh - 2rem)"></div>
 		<script>
@@ -66,12 +65,6 @@
 							type: 'raster',
 							tiles: ['https://api.spatialty.io/cog/{z}/{x}/{y}'],
 							attribution: "Copernicus Sentinel data 2024' for Sentinel data",
-						},
-						'osmvt-colorful': {
-							type: 'raster',
-							tiles: ['https://api.spatialty.io/osmvt-colorful/{z}/{x}/{y}'],
-							attribution:
-								'<a href="https://openstreetmap.org/">©︎ OpenStreetMap<a>',
 						},
 					},
 					layers: [
