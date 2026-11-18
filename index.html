@@ -37,34 +37,75 @@
 			<option value="gsi-std">GSI - std</option>
 			<option value="osmvt-colorful">versatiles-colorful</option>
 		</select>
+		<select id="crs">
+			<option value="">Web Mercator</option>
+		</select>
+		<label><input type="checkbox" id="grid" /> tile grid</label>
 		<div id="map" style="height: calc(100vh - 2rem)"></div>
+		<script src="https://unpkg.com/proj4@2.22.0/dist/proj4.js"></script>
 		<script type="module">
 			import * as maplibregl from 'https://unpkg.com/maplibre-gl@^6/dist/maplibre-gl.mjs';
+
+			const API = 'https://api.spatialty.io';
+			const params = new URLSearchParams(window.location.search);
+
+			// ?crs=<id>: tiles of that CRS's grid, shown in it (GL JS's addProjection)
+			const crsId = params.get('crs') ?? '';
+			const crsSelect = document.getElementById('crs');
+			for (const { id, name } of await (await fetch(`${API}/crs`)).json())
+				crsSelect.add(new Option(`${name} (${id})`, id, false, id === crsId));
+			crsSelect.onchange = () => {
+				const p = new URLSearchParams(window.location.search); // stylename may have changed
+				if (crsSelect.value) p.set('crs', crsSelect.value);
+				else p.delete('crs');
+				window.location.href = '?' + p; // drops the hash: zooms differ between CRSs
+			};
+
+			let projection;
+			let center = [140, 40];
+			let zoom = 4;
+			if (crsId) {
+				const crs = await (await fetch(`${API}/crs/${encodeURIComponent(crsId)}`)).json();
+				const name = 'spatialty:' + crsId; // addProjection needs a colon
+				maplibregl.addProjection({
+					name,
+					projection: proj4('EPSG:4326', crs.projjson),
+					tileMatrixSet: crs.tileMatrixSet,
+				});
+				projection = { type: name };
+				// the middle of the CRS's area of use
+				const b = crs.projjson.bbox;
+				const east = b.east_longitude < b.west_longitude ? b.east_longitude + 360 : b.east_longitude;
+				center = [((b.west_longitude + east) / 2 + 540) % 360 - 180, (b.south_latitude + b.north_latitude) / 2];
+				zoom = 0;
+			}
+			const crsQuery = crsId ? `?crs=${encodeURIComponent(crsId)}` : '';
 
 			const makeStyle = (stylename) => {
 				return {
 					version: 8,
+					...(projection ? { projection } : {}),
 					sources: {
 						'osmjp-osm': {
 							type: 'raster',
-							tiles: ['https://api.spatialty.io/osmjp-osm/{z}/{x}/{y}'],
+							tiles: [`${API}/osmjp-osm/{z}/{x}/{y}${crsQuery}`],
 							attribution:
 								'<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
 						},
 						'osmjp-bright': {
 							type: 'raster',
-							tiles: ['https://api.spatialty.io/osmjp-bright/{z}/{x}/{y}'],
+							tiles: [`${API}/osmjp-bright/{z}/{x}/{y}${crsQuery}`],
 							attribution:
 								'<a href="https://tile.openstreetmap.jp/">tile.openstreetmap.jp<a> <a href="https://www.openmaptiles.org/" target="_blank">&copy; OpenMapTiles</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
 						},
 						'gsi-std': {
 							type: 'raster',
-							tiles: ['https://api.spatialty.io/gsi-std/{z}/{x}/{y}'],
+							tiles: [`${API}/gsi-std/{z}/{x}/{y}${crsQuery}`],
 							attribution: 'GSI Vectortile',
 						},
 						'osmvt-colorful': {
 							type: 'raster',
-							tiles: ['https://api.spatialty.io/osmvt-colorful/{z}/{x}/{y}'],
+							tiles: [`${API}/osmvt-colorful/{z}/{x}/{y}${crsQuery}`],
 						},
 					},
 					layers: [
@@ -78,9 +119,7 @@
 			};
 
 			// query param
-			const defaultStyleName =
-				new URLSearchParams(window.location.search).get('stylename') ||
-				'osmjp-osm';
+			const defaultStyleName = params.get('stylename') || 'osmjp-osm';
 			// update select
 			document.querySelector(
 				`option[value="${defaultStyleName}"]`,
@@ -89,17 +128,21 @@
 			const map = new maplibregl.Map({
 				hash: true,
 				container: 'map', // container id
-				center: [140, 40],
-				zoom: 4,
+				center,
+				zoom,
 				minZoom: 0,
 				maxZoom: 18,
 				style: makeStyle(defaultStyleName),
 			});
 
-			// Globe Control
-			map.addControl(new maplibregl.GlobeControl({}), 'bottom-right');
+			// Globe Control (Web Mercator only)
+			if (!projection)
+				map.addControl(new maplibregl.GlobeControl({}), 'bottom-right');
 
-			document.querySelector('select').addEventListener('change', (e) => {
+			const grid = document.getElementById('grid');
+			grid.onchange = () => (map.showTileBoundaries = grid.checked);
+
+			document.querySelector('select:not(#crs)').addEventListener('change', (e) => {
 				const styleName = e.target.value;
 				map.setStyle(makeStyle(styleName));
 				// update query param
