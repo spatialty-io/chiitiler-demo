@@ -64,8 +64,10 @@
 			let projection;
 			let center = [140, 40];
 			let zoom = 4;
-			if (crsId) {
-				const crs = await (await fetch(`${API}/crs/${encodeURIComponent(crsId)}`)).json();
+			// an unknown id (e.g. a removed CRS in an old link) falls back to Web Mercator
+			const crsRes = crsId && (await fetch(`${API}/crs/${encodeURIComponent(crsId)}`));
+			if (crsRes?.ok) {
+				const crs = await crsRes.json();
 				const name = 'spatialty:' + crsId; // addProjection needs a colon
 				maplibregl.addProjection({
 					name,
@@ -74,12 +76,12 @@
 				});
 				projection = { type: name };
 				// the middle of the CRS's area of use
-				const b = crs.projjson.bbox;
+				const b = crs.projjson.bbox ?? crs.projjson.usages[0].bbox; // PROJJSON puts it in either
 				const east = b.east_longitude < b.west_longitude ? b.east_longitude + 360 : b.east_longitude;
 				center = [((b.west_longitude + east) / 2 + 540) % 360 - 180, (b.south_latitude + b.north_latitude) / 2];
 				zoom = 0;
 			}
-			const crsQuery = crsId ? `?crs=${encodeURIComponent(crsId)}` : '';
+			const crsQuery = crsRes?.ok ? `?crs=${encodeURIComponent(crsId)}` : '';
 
 			const makeStyle = (stylename) => {
 				return {
